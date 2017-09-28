@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -6,33 +7,60 @@
         <title>JavaScript Speech Recognition</title>
     </head>
     <body>
-        <h2>Can you tell me a story?</h2><br>
+		<span>Choose You native language!</span>
+		<div class="langs">
+			<button type="button" data-lang="yue-Hant-HK">粤语</button>
+			<button type="button" data-lang="en-GB">英语</button>
+			<button type="button" data-lang="cmn-Hant-TW">国语</button>
+			<button type="button" data-lang="stop">关闭</button>
+		</div>
         <div class="words" contenteditable>
 
         </div>
         <script type="text/javascript">
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const  recognition = new SpeechRecognition();
+			function Init(lang = "yue-Hant-HK"){
+				if(typeof recognition !== 'undefined'){
+					recognition.stop();
+					delete recognition;
+				}
+				recognition = new SpeechRecognition();
+				recognition.lang = lang;
+				recognition.interimResults = true;
+				let p = document.createElement('p');
+				const words = document.querySelector('.words');
 
-            recognition.interimResults = true;
-            let p = document.createElement('p');
-            const words = document.querySelector('.words');
-
-            words.appendChild(p);
-            recognition.addEventListener('result',e => {
-                // console.log(e.results);
-                const transcript = Array.from(e.results)
-                    .map(result => result[0])
-                    .map(result => result.transcript)
-                    .join('');
-                p.textContent = transcript;
-                if(e.results[0].isFinal){
-                    p = document.createElement('p');
-                    words.appendChild(p);
-                }
-            });
-            recognition.addEventListener('end', recognition.start);
-            recognition.start();
+				words.appendChild(p);
+				recognition.addEventListener('result',e => {
+					const transcript = Array.from(e.results)
+						.map(result => result[0])
+						.map(result => result.transcript)
+						.join('');
+					p.textContent = transcript;
+					if(e.results[0].isFinal){
+						p = document.createElement('p');
+						words.appendChild(p);
+					}
+				});
+				recognition.addEventListener('end', recognition.start);
+				recognition.start();
+			}
+			Init();
+			var lbtns = document.querySelector('.langs').children;
+			Array.from(lbtns).forEach(link => {
+				link.addEventListener('click', function(event) {
+					var ln = this.getAttribute("data-lang");
+					if(ln  == 'stop'){
+						if(typeof recognition !== 'undefined'){
+							recognition.stop();
+							delete recognition;
+						}
+					}else{
+						Init(ln);
+					}
+				});
+			});
+			
         </script>
     </body>
 </html>
